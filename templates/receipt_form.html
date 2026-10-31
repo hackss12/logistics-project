@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Create LR · Mohan Logistics{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow">NEW RECEIPT</div><h1>Create a digital LR</h1><p class="muted">The LR number is assigned by the shared database and is not editable.</p></div>
+  <a class="button secondary" href="{{ url_for('dashboard') }}">Cancel</a>
+</div>
+{% if errors %}<div class="validation panel"><strong>Please correct these items:</strong><ul>{% for error in errors %}<li>{{ error }}</li>{% endfor %}</ul></div>{% endif %}
+<form method="post" class="receipt-form" id="receipt-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <section class="panel form-section">
+    <div class="section-title"><span>01</span><div><h2>LR information</h2><p>Receipt date drives the year/month portion of the LR number.</p></div></div>
+    <div class="form-grid cols-4">
+      <label>Receipt date *<input type="date" name="receipt_date" value="{{ form.get('receipt_date', '') }}" required></label>
+      <label>CNS / serial number<input name="cns_serial_number" value="{{ form.get('cns_serial_number', '') }}"></label>
+      <label>Risk / insurance<select name="risk_type"><option>Owner's Risk</option><option {% if form.get('risk_type') == "Carrier's Risk" %}selected{% endif %}>Carrier's Risk</option></select></label>
+      <label>GR number<input value="Assigned when saved" disabled></label>
+    </div>
+  </section>
+  {% for party, title, known_parties in [('consignor','Consignor',consignors),('consignee','Consignee',consignees)] %}
+  <section class="panel form-section">
+    <div class="section-title"><span>0{{ loop.index + 1 }}</span><div><h2>{{ title }} details</h2><p>Enter the party information as it should appear on the receipt.</p></div></div>
+    <div class="form-grid cols-3">
+      <label>{{ title }} name *<input name="{{ party }}_name" list="{{ party }}-options" data-party-input="{{ party }}" value="{{ form.get(party + '_name', '') }}" required><datalist id="{{ party }}-options">{% for saved_party in known_parties %}<option value="{{ saved_party.name }}" data-party='{{ {"company_name":saved_party.company_name or "", "address":saved_party.address or "", "city":saved_party.city or "", "state":saved_party.state or "", "pin_code":saved_party.pin_code or "", "gstin":saved_party.gstin or "", "mobile":saved_party.mobile or "", "contact_person":saved_party.contact_person or ""}|tojson }}'></option>{% endfor %}</datalist></label>
+      <label>Company name<input name="{{ party }}_company_name" value="{{ form.get(party + '_company_name', '') }}"></label>
+      <label>Mobile<input name="{{ party }}_mobile" inputmode="numeric" pattern="[6-9][0-9]{9}" value="{{ form.get(party + '_mobile', '') }}"></label>
+      <label class="span-2">Full address<textarea name="{{ party }}_address" rows="2">{{ form.get(party + '_address', '') }}</textarea></label>
+      <label>Contact person<input name="{{ party }}_contact_person" value="{{ form.get(party + '_contact_person', '') }}"></label>
+      <label>City<input name="{{ party }}_city" value="{{ form.get(party + '_city', '') }}"></label>
+      <label>State<input name="{{ party }}_state" value="{{ form.get(party + '_state', '') }}"></label>
+      <label>PIN code<input name="{{ party }}_pin_code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" value="{{ form.get(party + '_pin_code', '') }}"></label>
+      <label>GSTIN<input name="{{ party }}_gstin" maxlength="15" value="{{ form.get(party + '_gstin', '') }}"></label>
+    </div>
+  </section>
+  {% endfor %}
+  <section class="panel form-section">
+    <div class="section-title"><span>04</span><div><h2>Transport & goods</h2><p>Route, vehicle, driver and consignment fields.</p></div></div>
+    <div class="form-grid cols-4">
+      <label>From STN<input name="from_station" value="{{ form.get('from_station', '') }}"></label>
+      <label>To STN<input name="to_station" value="{{ form.get('to_station', '') }}"></label>
+      <label class="span-2">Transit / route<input name="transit_route" value="{{ form.get('transit_route', '') }}"></label>
+      <label>Trailer number<input name="trailer_number" value="{{ form.get('trailer_number', '') }}"></label>
+      <label>Truck number<input name="truck_number" value="{{ form.get('truck_number', '') }}"></label>
+      <label>Driver name<input name="driver_name" value="{{ form.get('driver_name', '') }}"></label>
+      <label>Driver mobile<input name="driver_mobile" inputmode="numeric" value="{{ form.get('driver_mobile', '') }}"></label>
+      <label>Load number<input name="load_number" value="{{ form.get('load_number', '') }}"></label>
+      <label>Packing<input name="packing" value="{{ form.get('packing', '') }}"></label>
+      <label>Number of packages<input type="number" min="0" step="1" name="package_count" value="{{ form.get('package_count', '') }}"></label>
+      <label>Actual weight<input type="number" min="0" step="0.001" name="actual_weight" value="{{ form.get('actual_weight', '') }}"></label>
+      <label>Charged weight<input type="number" min="0" step="0.001" name="charged_weight" value="{{ form.get('charged_weight', '') }}"></label>
+      <label>Class of goods<input name="goods_class" value="{{ form.get('goods_class', '') }}"></label>
+      <label class="span-2">Description of goods<textarea name="goods_description" rows="2">{{ form.get('goods_description', '') }}</textarea></label>
+      <label>Declared invoice value (₹)<input type="number" min="0" step="0.01" name="declared_value" value="{{ form.get('declared_value', '0') }}"></label>
+    </div>
+  </section>
+  <section class="panel form-section">
+    <div class="section-title"><span>05</span><div><h2>Vehicle / invoice particulars</h2><p>Add a row for each vehicle or invoice. At least chassis or invoice number is required per populated row.</p></div></div>
+    <div class="table-wrap">
+      <table class="entry-table" id="particulars-table"><thead><tr><th>Sr. No.</th><th>Chassis No.</th><th>Model</th><th>Invoice Date</th><th>Shipment No.</th><th>Invoice No.</th><th></th></tr></thead>
+      <tbody id="particulars-body">
+      {% set chassis = form.getlist('particular_chassis_number[]') if form.getlist is defined else [] %}
+      {% for i in range(chassis|length) %}
+      <tr>
+        <td class="row-number">{{ loop.index }}</td>
+        {% for key, hint in [('chassis_number',''),('model',''),('invoice_date','date'),('shipment_number',''),('invoice_number','')] %}
+        <td><input type="{{ hint or 'text' }}" name="particular_{{ key }}[]" value="{{ form.getlist('particular_' + key + '[]')[i] if form.getlist('particular_' + key + '[]')|length > i else '' }}"></td>
+        {% endfor %}
+        <td><button class="icon-button remove-row" type="button" aria-label="Remove row">×</button></td>
+      </tr>
+      {% else %}
+      <tr>
+        <td class="row-number">1</td>
+        {% for key, hint in [('chassis_number',''),('model',''),('invoice_date','date'),('shipment_number',''),('invoice_number','')] %}
+        <td><input type="{{ hint or 'text' }}" name="particular_{{ key }}[]"></td>
+        {% endfor %}
+        <td><button class="icon-button remove-row" type="button" aria-label="Remove row">×</button></td>
+      </tr>
+      {% endfor %}
+      </tbody></table>
+    </div>
+    <button class="button secondary small-button" type="button" id="add-particular">＋ Add particulars row</button>
+  </section>
+  <section class="panel form-section">
+    <div class="section-title"><span>06</span><div><h2>Freight & payment</h2><p>Amounts use decimal-safe server calculations. Configured tax rate: {{ tax_rate }}%.</p></div></div>
+    <div class="charge-grid">
+      {% for key, label in [('freight','Freight'),('surcharge','Surcharge'),('cover_fov','Cover / FOV'),('local_godown','Local Godown Charges'),('door_delivery','Door Delivery Charges'),('cod','COD Charges'),('miscellaneous','Miscellaneous Charges'),('statistical','Statistical Charges'),('local_collection','Local Collection Charges')] %}
+      <label>{{ label }} (₹)<input class="charge-input" type="number" min="0" step="0.01" name="charge_{{ key }}" value="{{ form.get('charge_' + key, '0') }}"></label>
+      {% endfor %}
+      <label>Subtotal (calculated)<input id="subtotal-preview" value="₹0.00" readonly></label>
+      <label>Tax (calculated)<input id="tax-preview" value="₹0.00" readonly></label>
+      <label>Grand total (calculated)<input id="grand-total-preview" value="₹0.00" readonly></label>
+    </div>
+    <div class="form-grid cols-3 payment-fields">
+      <label>Payment type *<select name="payment_type" required><option value="">Select…</option>{% for option in ['To Pay','Paid by Bill','COD-D/D Amount'] %}<option {% if form.get('payment_type') == option %}selected{% endif %}>{{ option }}</option>{% endfor %}</select></label>
+      <label>Amount paid (₹)<input type="number" min="0" step="0.01" name="amount_paid" value="{{ form.get('amount_paid', '0') }}"></label>
+      <label>Payment remarks<input name="payment_remarks" value="{{ form.get('payment_remarks', '') }}"></label>
+    </div>
+  </section>
+  <div class="form-actions"><a class="button secondary" href="{{ url_for('dashboard') }}">Discard</a><button class="button primary" type="submit" id="save-receipt">Save & issue LR</button></div>
+</form>
+{% endblock %}

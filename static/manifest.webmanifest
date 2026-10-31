@@ -1,0 +1,18 @@
+{
+  "name": "Mohan Logistics Digital LR Book",
+  "short_name": "Mohan Logistics",
+  "description": "Create and manage Mohan Logistics Lorry Receipts.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f3f6f7",
+  "theme_color": "#123a50",
+  "icons": [
+    {
+      "src": "/static/images/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

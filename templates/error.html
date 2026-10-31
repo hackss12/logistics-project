@@ -1,0 +1,3 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · Mohan Logistics{% endblock %}
+{% block content %}<section class="panel error-page"><div class="eyebrow">REQUEST NOT COMPLETED</div><h1>{{ title }}</h1><p>{{ message }}</p><a class="button secondary" href="{{ url_for('dashboard') }}">Return to dashboard</a></section>{% endblock %}

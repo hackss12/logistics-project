@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Receipts · Mohan Logistics{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow">REGISTER</div><h1>Receipts</h1><p class="muted">Search LR, consignor, consignee, vehicle, chassis, shipment or invoice number.</p></div>
+  <a class="button secondary" href="{{ url_for('export_receipts', status=request.args.get('status', ''), start=request.args.get('start', ''), end=request.args.get('end', '')) }}">Export CSV</a>
+</div>
+<form class="filter-bar panel" method="get">
+  <label class="grow">Search<input name="q" value="{{ request.args.get('q', '') }}" placeholder="LR number, name, vehicle, invoice…"></label>
+  <label>Status<select name="status"><option value="">All</option>{% for s in ['Issued','Cancelled'] %}<option {% if request.args.get('status') == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></label>
+  <label>From<input type="date" name="start" value="{{ request.args.get('start', '') }}"></label>
+  <label>To<input type="date" name="end" value="{{ request.args.get('end', '') }}"></label>
+  <button class="button primary" type="submit">Filter</button>
+</form>
+<section class="panel">{% include "_receipt_table.html" %}</section>
+{% endblock %}

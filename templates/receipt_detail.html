@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{{ receipt.lr_number }} · Mohan Logistics{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow">RECEIPT DETAILS</div><h1>{{ receipt.lr_number }}</h1><p class="muted">{{ receipt.receipt_date.strftime('%d-%m-%Y') }} · {{ receipt.status }} · {{ receipt.payment_status }}</p></div>
+  <div class="action-row">
+    <a class="button secondary" target="_blank" href="{{ url_for('receipt_pdf', receipt_id=receipt.id, copy='all') }}">Preview all copies</a>
+    <a class="button primary" href="{{ url_for('receipt_pdf', receipt_id=receipt.id, copy='all', download=1) }}">Download combined PDF</a>
+  </div>
+</div>
+<section class="panel">
+  <h2>Copies · choose to preview or print</h2>
+  <div class="copy-grid">
+    {% for kind, title, color in [('consignor','Consignor','pink'),('consignee','Consignee','white'),('driver','Driver','yellow'),('record','Record','green'),('extra','Extra','blue'),('white_consignor','White Consignor','white')] %}
+    <div class="copy-card"><span class="swatch {{ color }}"></span><span>{{ title }} copy</span><a class="copy-action" target="_blank" href="{{ url_for('receipt_pdf', receipt_id=receipt.id, copy=kind) }}">Preview / print</a><a class="copy-action" href="{{ url_for('receipt_pdf', receipt_id=receipt.id, copy=kind, download=1) }}">PDF</a></div>
+    {% endfor %}
+  </div>
+</section>
+<section class="detail-grid">
+  <article class="panel"><h2>Parties</h2><h3>Consignor</h3><p>{{ receipt.consignor.name }}{% if receipt.consignor.company_name %}<br>{{ receipt.consignor.company_name }}{% endif %}<br>{{ receipt.consignor.address or '' }}<br>{{ receipt.consignor.city or '' }} {{ receipt.consignor.pin_code or '' }}<br>{{ receipt.consignor.mobile or '' }} · {{ receipt.consignor.gstin or '' }}</p><h3>Consignee</h3><p>{{ receipt.consignee.name }}{% if receipt.consignee.company_name %}<br>{{ receipt.consignee.company_name }}{% endif %}<br>{{ receipt.consignee.address or '' }}<br>{{ receipt.consignee.city or '' }} {{ receipt.consignee.pin_code or '' }}<br>{{ receipt.consignee.mobile or '' }} · {{ receipt.consignee.gstin or '' }}</p></article>
+  <article class="panel"><h2>Transport & payment</h2><dl class="facts"><dt>Route</dt><dd>{{ receipt.from_station or '—' }} → {{ receipt.to_station or '—' }} · {{ receipt.transit_route or '—' }}</dd><dt>Truck / Trailer</dt><dd>{{ receipt.truck_number or '—' }} / {{ receipt.trailer_number or '—' }}</dd><dt>Driver</dt><dd>{{ receipt.driver_name or '—' }} · {{ receipt.driver_mobile or '—' }}</dd><dt>Packages / weight</dt><dd>{{ receipt.package_count or '—' }} · {{ receipt.actual_weight or '—' }} / {{ receipt.charged_weight or '—' }}</dd><dt>Payment</dt><dd>{{ receipt.payment_type }} · Paid ₹{{ '{:,.2f}'.format(receipt.amount_paid) }} · Due ₹{{ '{:,.2f}'.format(receipt.balance_due) }}</dd><dt>Grand total</dt><dd><strong>₹{{ '{:,.2f}'.format(receipt.grand_total) }}</strong></dd></dl></article>
+</section>
+<section class="panel">
+  <h2>Vehicle / invoice particulars</h2>
+  <div class="table-wrap"><table><thead><tr><th>Sr. No.</th><th>Chassis No.</th><th>Model</th><th>Invoice Date</th><th>Shipment No.</th><th>Invoice No.</th></tr></thead><tbody>
+  {% for row in receipt.particulars %}<tr><td>{{ row.serial_no }}</td><td>{{ row.chassis_number or '—' }}</td><td>{{ row.model or '—' }}</td><td>{{ row.invoice_date.strftime('%d-%m-%Y') if row.invoice_date else '—' }}</td><td>{{ row.shipment_number or '—' }}</td><td>{{ row.invoice_number or '—' }}</td></tr>{% else %}<tr><td colspan="6" class="empty">No vehicle particulars.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% if current_user.role == 'admin' and receipt.status == 'Issued' %}
+<form class="panel danger-panel" method="post" action="{{ url_for('cancel_receipt', receipt_id=receipt.id) }}" onsubmit="return confirm('Cancel this issued receipt? Its LR number will remain permanently reserved.');">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><div><h2>Cancel receipt</h2><p class="muted">Cancellation is audited; the LR number will never be reused.</p></div><button class="button danger" type="submit">Cancel LR</button>
+</form>
+{% endif %}
+{% endblock %}

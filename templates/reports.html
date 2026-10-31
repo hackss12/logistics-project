@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Reports · Mohan Logistics{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">REGISTER & COLLECTION</div><h1>Reports</h1><p class="muted">Filter the MySQL register by date, parties, vehicle, or status.</p></div>
+  <div class="action-row">
+    <a class="button secondary" href="{{ url_for('export_receipts', start=filters.start, end=filters.end, consignor=filters.consignor, consignee=filters.consignee, vehicle=filters.vehicle, status=filters.status, payment_status=filters.payment_status) }}">Export CSV</a>
+    <a class="button secondary" href="{{ url_for('export_receipts_xlsx', start=filters.start, end=filters.end, consignor=filters.consignor, consignee=filters.consignee, vehicle=filters.vehicle, status=filters.status, payment_status=filters.payment_status) }}">Export Excel</a>
+  </div>
+</div>
+<form class="filter-bar panel" method="get">
+  <label>From date<input type="date" name="start" value="{{ filters.start }}"></label>
+  <label>To date<input type="date" name="end" value="{{ filters.end }}"></label>
+  <label>Consignor<input name="consignor" value="{{ filters.consignor }}"></label>
+  <label>Consignee<input name="consignee" value="{{ filters.consignee }}"></label>
+  <label>Vehicle<input name="vehicle" value="{{ filters.vehicle }}"></label>
+  <label>Status<select name="status"><option value="">All statuses</option>{% for s in ['Issued','Cancelled'] %}<option {% if filters.status == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></label>
+  <label>Payment status<select name="payment_status"><option value="">All payments</option>{% for s in ['Paid','Partial','Pending'] %}<option {% if filters.payment_status == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></label>
+  <button class="button primary" type="submit">Run report</button>
+</form>
+<section class="metric-grid">
+  <article class="metric"><span>Matching receipts</span><strong>{{ receipt_count }}</strong></article>
+  <article class="metric"><span>Grand total (₹)</span><strong>{{ '{:,.2f}'.format(freight_total) }}</strong></article>
+</section>
+<section class="panel">{% include "_receipt_table.html" %}</section>
+{% endblock %}

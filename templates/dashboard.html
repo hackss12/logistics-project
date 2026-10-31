@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Mohan Logistics{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow">OPERATIONS</div><h1>LR book</h1><p class="muted">Receipt records stored in the shared MySQL database.</p></div>
+  {% if current_user.role in ['admin', 'operator'] %}<a class="button primary" href="{{ url_for('new_receipt') }}">＋ Create LR</a>{% endif %}
+</div>
+<section class="metric-grid">
+  <article class="metric"><span>Total receipts</span><strong>{{ total }}</strong></article>
+  <article class="metric"><span>Today's receipts</span><strong>{{ today_count }}</strong></article>
+  <article class="metric"><span>This month</span><strong>{{ month_count }}</strong></article>
+  <article class="metric"><span>Cancelled</span><strong>{{ cancelled_count }}</strong></article>
+</section>
+<section class="panel">
+  <div class="panel-heading"><h2>Recent receipts</h2><a href="{{ url_for('receipt_list') }}">View all →</a></div>
+  {% include "_receipt_table.html" %}
+</section>
+{% endblock %}

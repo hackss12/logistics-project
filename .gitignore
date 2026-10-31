@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+.venv/
+.first_admin_credentials.txt
+__pycache__/
+*.py[cod]
+*.pdf
+.pytest_cache/
+.coverage
+instance/
+*.db
+*.sqlite
+*.sqlite3

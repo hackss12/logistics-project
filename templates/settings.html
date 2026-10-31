@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Company settings · Mohan Logistics{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">ADMINISTRATION</div><h1>Company settings</h1><p class="muted">These values are used in generated LR PDFs and tax calculations.</p></div></div>
+<form method="post" class="panel form-section">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="form-grid cols-2">
+    <label>Company name<input name="company_name" value="{{ values.company_name }}" required></label>
+    <label>Header text<input name="tagline" value="{{ values.tagline }}"></label>
+    <label>Jurisdiction statement<input name="jurisdiction" value="{{ values.jurisdiction }}"></label>
+    <label>Registered office<input name="registered_office" value="{{ values.registered_office }}"></label>
+    <label>Registered office address<input name="address" value="{{ values.address }}"></label>
+    <label>Corporate office<input name="corporate_office" value="{{ values.corporate_office }}"></label>
+    <label>Email<input type="email" name="email" value="{{ values.email }}"></label>
+    <label>GSTIN<input name="gstin" maxlength="15" value="{{ values.gstin }}"></label>
+    <label>Applicable tax rate (%)<input type="number" min="0" max="100" step="0.0001" name="tax_rate" value="{{ values.tax_rate }}" required></label>
+  </div>
+  <div class="form-actions"><button class="button primary" type="submit">Save settings</button></div>
+</form>
+<section class="panel">
+  <p class="muted">The company logo is intentionally not fabricated. Replace the marked logo area in the PDF renderer with the approved logo asset once supplied.</p>
+</section>
+{% endblock %}

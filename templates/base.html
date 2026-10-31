@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#123a50">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Mohan Logistics">
+  <title>{% block title %}Mohan Logistics LR{% endblock %}</title>
+  <link rel="manifest" href="{{ url_for('web_manifest') }}">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/app-icon.svg') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/mohan_logistics_logo.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body data-tax-rate="{{ config['TAX_RATE'] }}">
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('login') }}">
+      <img class="brand-logo" src="{{ url_for('static', filename='images/mohan_logistics_logo.png') }}" alt="Mohan Logistics logo">
+      <span>MOHAN LOGISTICS <small>Digital LR Book</small></span>
+    </a>
+    {% if current_user.is_authenticated %}
+    <nav>
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('receipt_list') }}">Receipts</a>
+      <a href="{{ url_for('reports') }}">Reports</a>
+      <a href="{{ url_for('change_password') }}">Password</a>
+      {% if current_user.role in ['admin', 'operator'] %}<a href="{{ url_for('new_receipt') }}">New LR</a>{% endif %}
+      {% if current_user.role == 'admin' %}
+      <a href="{{ url_for('manage_users') }}">Users</a>
+      <a href="{{ url_for('manage_settings') }}">Settings</a>
+      <a href="{{ url_for('audit_log') }}">Audit Log</a>
+      {% endif %}
+      <span class="user-tag">{{ current_user.username }} · {{ current_user.role|title }}</span>
+      <form class="logout-form" method="post" action="{{ url_for('logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="link-button" type="submit">Log out</button>
+      </form>
+    </nav>
+    {% endif %}
+  </header>
+  <main class="page">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}<div class="flash-stack">{% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</body>
+</html>

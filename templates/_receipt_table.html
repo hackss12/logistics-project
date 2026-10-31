@@ -1,0 +1,17 @@
+<div class="table-wrap">
+<table>
+  <thead><tr><th>LR number</th><th>Date</th><th>Consignor</th><th>Consignee</th><th>Vehicle</th><th>Total</th><th>Status</th></tr></thead>
+  <tbody>
+  {% for receipt in receipts %}
+    <tr>
+      <td><a class="strong-link" href="{{ url_for('receipt_detail', receipt_id=receipt.id) }}">{{ receipt.lr_number or 'Draft' }}</a></td>
+      <td>{{ receipt.receipt_date.strftime('%d-%m-%Y') }}</td>
+      <td>{{ receipt.consignor.name }}</td><td>{{ receipt.consignee.name }}</td>
+      <td>{{ receipt.truck_number or receipt.trailer_number or '—' }}</td>
+      <td>₹{{ '{:,.2f}'.format(receipt.grand_total) }}</td>
+      <td><span class="status {{ receipt.status|lower }}">{{ receipt.status }}</span></td>
+    </tr>
+  {% else %}<tr><td class="empty" colspan="7">No receipts found.</td></tr>{% endfor %}
+  </tbody>
+</table>
+</div>

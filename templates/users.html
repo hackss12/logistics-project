@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}User management · Mohan Logistics{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">ADMINISTRATION</div><h1>User management</h1><p class="muted">Create accounts and control access to the shared LR book.</p></div></div>
+<section class="panel">
+  <h2>Create a user</h2>
+  <form method="post" class="user-create">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Username<input name="username" maxlength="80" required></label>
+    <label>Role<select name="role" required><option value="operator">Operator</option><option value="viewer">Viewer</option><option value="admin">Admin</option></select></label>
+    <label>Password (12+ characters)<input type="password" name="password" minlength="12" autocomplete="new-password" required></label>
+    <button class="button primary" type="submit">Create user</button>
+  </form>
+</section>
+<section class="panel">
+  <h2>Accounts</h2>
+  <div class="table-wrap"><table><thead><tr><th>Username</th><th>Role</th><th>Created</th><th>Status</th><th></th></tr></thead><tbody>
+  {% for user in users %}
+  <tr><td>{{ user.username }}</td><td>{{ user.role|title }}</td><td>{{ user.created_at.strftime('%d-%m-%Y') }}</td><td><span class="status {{ 'cancelled' if not user.is_active else '' }}">{{ 'Active' if user.is_active else 'Inactive' }}</span></td><td>
+    {% if user.id != current_user.id %}
+    <form method="post" action="{{ url_for('toggle_user', user_id=user.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="button secondary small-button" type="submit">{{ 'Deactivate' if user.is_active else 'Activate' }}</button>
+    </form>
+    {% endif %}
+  </td></tr>
+  {% else %}<tr><td colspan="5" class="empty">No users found.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endblock %}

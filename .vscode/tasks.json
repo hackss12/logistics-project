@@ -1,0 +1,81 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Initialize Mohan LR database",
+			"type": "shell",
+			"command": ".venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"flask",
+				"--app",
+				"app",
+				"init-db"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "Run Mohan LR web app",
+			"type": "shell",
+			"command": ".venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"flask",
+				"--app",
+				"app",
+				"run",
+				"--host",
+				"127.0.0.1",
+				"--port",
+				"5000"
+			],
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Run Mohan LR tests",
+			"type": "shell",
+			"command": ".venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"unittest",
+				"discover",
+				"-s",
+				"tests",
+				"-v"
+			],
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Verify logo PDF colors",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"add",
+				"--",
+				".vscode/tasks.json"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Final logo and PDF tests",
+			"type": "shell",
+			"command": ".venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"unittest",
+				"discover",
+				"-s",
+				"tests",
+				"-v"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		}
+	]
+}
