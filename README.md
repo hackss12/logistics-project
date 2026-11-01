@@ -87,7 +87,7 @@ For access outside the office, deploy behind a production WSGI server and an HTT
 
 ### Deploy to Vercel
 
-The GitHub repository is configured for Vercel's Python/Flask runtime. Import `hackss12/logistics-project` from the Vercel dashboard (or use the project link provided by Vercel). Vercel builds static files from `static/` into `public/`; the build script is in `vercel_build.py`.
+The GitHub repository is configured for Vercel's Python/Flask runtime. Import `hackss12/logistics-project` from the Vercel dashboard (or use the project link provided by Vercel). Vercel installs application packages from `requirements.txt` and builds static files from `static/` into `public/` using `vercel_build.py`.
 
 Before the first deployment, configure these in **Vercel Project → Settings → Environment Variables** for Production (and Preview if needed):
 
