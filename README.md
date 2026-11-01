@@ -85,6 +85,28 @@ For office-network access only, run the web server bound to the server's private
 
 For access outside the office, deploy behind a production WSGI server and an HTTPS reverse proxy or managed HTTPS hosting service. Use a private database endpoint, strong unique credentials, secure backups, and firewall rules. Do not expose MySQL port 3306 to the public internet. The built-in Flask development server is not a production server; remote use is not ready until this deployment is completed and secured.
 
+### Deploy to Vercel
+
+The GitHub repository is configured for Vercel's Python/Flask runtime. Import `hackss12/logistics-project` from the Vercel dashboard (or use the project link provided by Vercel). Vercel builds static files from `static/` into `public/`; the build script is in `vercel_build.py`.
+
+Before the first deployment, configure these in **Vercel Project → Settings → Environment Variables** for Production (and Preview if needed):
+
+- `SECRET_KEY`: a long, unique random value.
+- `DATABASE_URL`: SQLAlchemy URL for a managed MySQL 8 database reachable from Vercel, for example `mysql+pymysql://USER:PASSWORD@PUBLIC_DB_HOST:3306/DB_NAME?charset=utf8mb4`. URL-encode special characters in the username or password.
+- `SESSION_COOKIE_SECURE`: `1`.
+- `TAX_RATE`: only if a confirmed rate applies.
+
+Do not use the development database host `localhost` or expose an office computer's MySQL port to the internet. Use the database provider's secure external connection endpoint and network controls. Keep these values private; never commit them or send them in chat.
+
+After setting environment variables, redeploy. Initialize the schema and create the first administrator against the hosted database from a trusted local machine with the same `DATABASE_URL` and `SECRET_KEY` set in its environment:
+
+```powershell
+flask --app app init-db
+flask --app app create-admin
+```
+
+The deployed site will not work until a reachable database is configured and initialized. The desktop client is not hosted on Vercel; only the browser app is deployed. Vercel Functions are not a replacement for durable database storage, so keep MySQL on a managed database and maintain backups.
+
 ### Install on phones and tablets
 
 The browser app includes a PWA manifest and can be added to a device's home screen. Serve it over HTTPS (or use `localhost` for development); mobile browsers do not allow service workers on a plain HTTP LAN address. Keep the web server and database reachable: the installed app is an online client, not an offline copy.
